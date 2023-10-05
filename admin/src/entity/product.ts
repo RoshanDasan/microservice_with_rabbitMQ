@@ -1,6 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-
 @Entity()
 export class Product {
     @PrimaryGeneratedColumn()
@@ -14,5 +13,4 @@ export class Product {
 
     @Column({ default: 0 })
     likes: number;
-
 }

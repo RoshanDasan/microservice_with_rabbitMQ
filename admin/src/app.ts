@@ -52,9 +52,54 @@ async function startServer() {
       }
     });
 
+    app.get('/api/products/:id', async (req: Request, res: Response) => {
+      try {
+        const product = await productRepository.findOne({ where: { id: parseInt(req.params.id) } })
+        res.json(product)
+      } catch (error) {
+        console.error(`Error while fetching product: ${error}`);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    })
+
+    app.put('/api/products/:id', async (req: Request, res: Response) => {
+      try {
+        const product = await productRepository.findOne({ where: { id: parseInt(req.params.id) } })
+        productRepository.merge(product, req.body)
+        const result = await productRepository.save(product)
+        res.json(result)
+      } catch (error) {
+        console.error(`Error while updating product: ${error}`);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    })
+
+    app.delete('/api/products/:id', async (req: Request, res: Response) => {
+      try {
+        const result = await productRepository.delete(req.params.id)
+        res.json(result)
+      } catch (error) {
+        console.error(`Error while deleting product: ${error}`);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    })
+
+    app.post('/api/products/like/:id', async (req: Request, res: Response) => {
+      try {
+        const product = await productRepository.findOne({ where: { id: parseInt(req.params.id) } })
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        product.likes++
+        const result = await productRepository.save(product)
+        res.json(result)
+      } catch (error) {
+        console.error(`Error while updating like of the product: ${error}`);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    })
+
     app.listen(5000, () => console.log('Server connected'));
   } catch (error) {
-    console.error(`Error while connecting to the database: ${error}`); 
+    console.error(`Error while connecting to the database: ${error}`);
   }
 }
 

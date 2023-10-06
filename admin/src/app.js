@@ -109,6 +109,96 @@ function startServer() {
                             }
                         });
                     }); });
+                    app.get('/api/products/:id', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var product, error_4;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, productRepository_1.findOne({ where: { id: parseInt(req.params.id) } })];
+                                case 1:
+                                    product = _a.sent();
+                                    res.json(product);
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    error_4 = _a.sent();
+                                    console.error("Error while fetching product: ".concat(error_4));
+                                    res.status(500).json({ error: 'Internal Server Error' });
+                                    return [3 /*break*/, 3];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.put('/api/products/:id', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var product, result, error_5;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 3, , 4]);
+                                    return [4 /*yield*/, productRepository_1.findOne({ where: { id: parseInt(req.params.id) } })];
+                                case 1:
+                                    product = _a.sent();
+                                    productRepository_1.merge(product, req.body);
+                                    return [4 /*yield*/, productRepository_1.save(product)];
+                                case 2:
+                                    result = _a.sent();
+                                    res.json(result);
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    error_5 = _a.sent();
+                                    console.error("Error while updating product: ".concat(error_5));
+                                    res.status(500).json({ error: 'Internal Server Error' });
+                                    return [3 /*break*/, 4];
+                                case 4: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.delete('/api/products/:id', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var result, error_6;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, productRepository_1.delete(req.params.id)];
+                                case 1:
+                                    result = _a.sent();
+                                    res.json(result);
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    error_6 = _a.sent();
+                                    console.error("Error while deleting product: ".concat(error_6));
+                                    res.status(500).json({ error: 'Internal Server Error' });
+                                    return [3 /*break*/, 3];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.post('/api/products/like/:id', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var product, result, error_7;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 3, , 4]);
+                                    return [4 /*yield*/, productRepository_1.findOne({ where: { id: parseInt(req.params.id) } })];
+                                case 1:
+                                    product = _a.sent();
+                                    if (!product)
+                                        return [2 /*return*/, res.status(404).json({ error: 'Product not found' })];
+                                    product.likes++;
+                                    return [4 /*yield*/, productRepository_1.save(product)];
+                                case 2:
+                                    result = _a.sent();
+                                    res.json(result);
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    error_7 = _a.sent();
+                                    console.error("Error while updating like of the product: ".concat(error_7));
+                                    res.status(500).json({ error: 'Internal Server Error' });
+                                    return [3 /*break*/, 4];
+                                case 4: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     app.listen(5000, function () { return console.log('Server connected'); });
                     return [3 /*break*/, 3];
                 case 2:

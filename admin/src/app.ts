@@ -40,7 +40,6 @@ async function startServer() {
       app.get('/api/products', async (req: Request, res: Response) => {
         try {
           const products = await productRepository.find();
-          channel.sendToQueue('hello', Buffer.from('hello'))
           res.json(products);
         } catch (error) {
           console.error(`Error while fetching data: ${error}`);
@@ -52,6 +51,7 @@ async function startServer() {
         try {
           const product = productRepository.create(req.body);
           const result = await productRepository.save(product);
+          channel.sendToQueue('product_created', Buffer.from(JSON.stringify(result)))
           res.json(result);
         } catch (error) {
           console.error(`Error while saving product: ${error}`);
@@ -74,6 +74,7 @@ async function startServer() {
           const product = await productRepository.findOne({ where: { id: parseInt(req.params.id) } })
           productRepository.merge(product, req.body)
           const result = await productRepository.save(product)
+          channel.sendToQueue('product_updated', Buffer.from(JSON.stringify(result)))
           res.json(result)
         } catch (error) {
           console.error(`Error while updating product: ${error}`);
@@ -84,6 +85,7 @@ async function startServer() {
       app.delete('/api/products/:id', async (req: Request, res: Response) => {
         try {
           const result = await productRepository.delete(req.params.id)
+          channel.sendToQueue('product_deleted', Buffer.from(req.params.id))
           res.json(result)
         } catch (error) {
           console.error(`Error while deleting product: ${error}`);

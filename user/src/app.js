@@ -44,6 +44,7 @@ var product_1 = require("./entity/product");
 function startServer() {
     return __awaiter(this, void 0, void 0, function () {
         var connection, productRepository;
+        var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, (0, typeorm_1.createConnection)({
@@ -64,16 +65,66 @@ function startServer() {
                         connection.createChannel(function (err1, channel) {
                             if (err1)
                                 throw err1;
-                            channel.assertQueue('hello', { durable: false });
+                            channel.assertQueue('product_created', { durable: false });
+                            channel.assertQueue('product_updated', { durable: false });
+                            channel.assertQueue('product_deleted', { durable: false });
                             var app = express();
                             // Cors setup for UI 
                             app.use(cors({
                                 origin: 'http://localhost:3000', // Allow requests from your frontend
                             }));
                             app.use(express.json());
-                            channel.consume('hello', function (msg) {
-                                console.log(msg.content.toString());
-                            });
+                            channel.consume('product_created', function (msg) { return __awaiter(_this, void 0, void 0, function () {
+                                var _a, title, image, likes, id, product;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            _a = JSON.parse(msg.content.toString()), title = _a.title, image = _a.image, likes = _a.likes, id = _a.id;
+                                            product = new product_1.Product();
+                                            product.title = title;
+                                            product.image = image;
+                                            product.likes = likes;
+                                            product.admin_id = id;
+                                            return [4 /*yield*/, productRepository.save(product)];
+                                        case 1:
+                                            _b.sent();
+                                            console.log('Product created');
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); }, { noAck: true });
+                            channel.consume('product_updated', function (msg) { return __awaiter(_this, void 0, void 0, function () {
+                                var _a, title, image, likes, id, product;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            _a = JSON.parse(msg.content.toString()), title = _a.title, image = _a.image, likes = _a.likes, id = _a.id;
+                                            return [4 /*yield*/, productRepository.findOne({ where: { admin_id: id } })];
+                                        case 1:
+                                            product = _b.sent();
+                                            productRepository.merge(product, { title: title, image: image, likes: likes });
+                                            console.log('Product updated');
+                                            return [4 /*yield*/, productRepository.save(product)];
+                                        case 2:
+                                            _b.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); }, { noAck: true });
+                            channel.consume('product_deleted', function (msg) { return __awaiter(_this, void 0, void 0, function () {
+                                var admin_id;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            admin_id = JSON.parse(msg.content.toString());
+                                            return [4 /*yield*/, productRepository.delete({ admin_id: admin_id })];
+                                        case 1:
+                                            _a.sent();
+                                            console.log('Product deleted');
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); });
                             app.listen(6000, function () { return console.log('Server connected on port 6000'); });
                             process.on('beforeExit', function () {
                                 console.log('Connection closed');

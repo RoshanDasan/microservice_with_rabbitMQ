@@ -24,7 +24,9 @@ async function startServer() {
     connection.createChannel((err1, channel) => {
       if (err1) throw err1
 
-      channel.assertQueue('hello', { durable: false })
+      channel.assertQueue('product_created', { durable: false })
+      channel.assertQueue('product_updated', { durable: false })
+      channel.assertQueue('product_deleted', { durable: false })
 
       const app = express();
 
@@ -37,8 +39,30 @@ async function startServer() {
 
       app.use(express.json());
 
-      channel.consume('hello', (msg) => {
-        console.log(msg.content.toString());
+      channel.consume('product_created', async (msg) => {
+        const { title, image, likes, id } = JSON.parse(msg.content.toString())
+        const product = new Product()
+        product.title = title
+        product.image = image
+        product.likes = likes
+        product.admin_id = id
+        await productRepository.save(product)
+        console.log('Product created');
+
+      }, { noAck: true })
+
+      channel.consume('product_updated', async (msg) => {
+        const { title, image, likes, id } = JSON.parse(msg.content.toString())
+        const product = await productRepository.findOne({ where: { admin_id: id } })
+        productRepository.merge(product, { title, image, likes })
+        console.log('Product updated');
+        await productRepository.save(product)
+      }, { noAck: true })
+
+      channel.consume('product_deleted', async (msg) => {
+        const admin_id = JSON.parse(msg.content.toString())
+        await productRepository.delete({ admin_id })
+        console.log('Product deleted');
 
       })
 

@@ -85,7 +85,6 @@ function startServer() {
                                                 return [4 /*yield*/, productRepository.find()];
                                             case 1:
                                                 products = _a.sent();
-                                                channel.sendToQueue('hello', Buffer.from('hello'));
                                                 res.json(products);
                                                 return [3 /*break*/, 3];
                                             case 2:
@@ -107,6 +106,7 @@ function startServer() {
                                                 return [4 /*yield*/, productRepository.save(product)];
                                             case 1:
                                                 result = _a.sent();
+                                                channel.sendToQueue('product_created', Buffer.from(JSON.stringify(result)));
                                                 res.json(result);
                                                 return [3 /*break*/, 3];
                                             case 2:
@@ -151,6 +151,7 @@ function startServer() {
                                                 return [4 /*yield*/, productRepository.save(product)];
                                             case 2:
                                                 result = _a.sent();
+                                                channel.sendToQueue('product_updated', Buffer.from(JSON.stringify(result)));
                                                 res.json(result);
                                                 return [3 /*break*/, 4];
                                             case 3:
@@ -171,6 +172,7 @@ function startServer() {
                                                 return [4 /*yield*/, productRepository.delete(req.params.id)];
                                             case 1:
                                                 result = _a.sent();
+                                                channel.sendToQueue('product_deleted', Buffer.from(req.params.id));
                                                 res.json(result);
                                                 return [3 /*break*/, 3];
                                             case 2:
